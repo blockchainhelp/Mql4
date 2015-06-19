@@ -8,14 +8,21 @@
 #property version   "1.00"
 #property strict
 //--- input parameters
-input double   lot;
+input double   Lot = 0.01; // lot parametr
+input string   TimeToSetOrders_1= 10:20;
+input string   TimeToSetOrders_2= 15:15;
+input string   TimeToSetOrders_3= 02:00;
+input int      Distance         = 20;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit()
   {
-//---
-   
+//--- increment for terminals with 3 or 5 digits
+   if(Digits = 3 || Digits=5)
+     {
+      Distance = *10;
+     }
 //---
    return(INIT_SUCCEEDED);
   }
