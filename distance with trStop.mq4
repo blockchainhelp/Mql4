@@ -59,3 +59,17 @@ for (int i=OrdersTotal()-1; i>=0; i--)
    return(count);
 }
 //+------------------------------------------------------------------+
+int CountSellStop() //На продажу
+{
+int count=0;
+for (int i=OrdersTotal()-1; i>=0; i--)
+   {
+	if(OrderSelect(i,SELECT_BY_POS, MODE_TRADES))
+	   {
+		if (OrderSymbol()==Symbol()&& OrderMagicNumber()==Magic && OrderType()== OP_SELLSTOP)
+          count++;
+	   }
+   }
+   return(count);
+ }
+//+------------------------------------------------------------------+
