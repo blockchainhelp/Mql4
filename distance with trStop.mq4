@@ -43,3 +43,19 @@ void OnTick()
    
   }
 //+------------------------------------------------------------------+
+//Проверка количества отложенных ордеров условие 
+//+------------------------------------------------------------------+
+int CountByStop() //На покупку
+{
+int count=0;
+for (int i=OrdersTotal()-1; i>=0; i--)
+   {
+	if(OrderSelect(i,SELECT_BY_POS, MODE_TRADES))
+	   {
+		if (OrderSymbol()==Symbol()&& OrderMagicNumber()==Magic && OrderType()== OP_BUYSTOP)
+          count++;
+	   }
+   }
+   return(count);
+}
+//+------------------------------------------------------------------+
