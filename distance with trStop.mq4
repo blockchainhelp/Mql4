@@ -68,4 +68,36 @@ void OnTick()
    CountSellStop();
    Checker();
   }
-  
+ //+------------------------------------------------------------------+
+//Проверка количества открытых ордеров на покупку
+//+------------------------------------------------------------------+
+int CountBuy() //На покупку
+{
+int count=0;
+for (int i=OrdersTotal()-1; i>=0; i--)
+   {
+	if(OrderSelect(i,SELECT_BY_POS, MODE_TRADES))
+	   {
+		if (OrderSymbol()==Symbol()&& OrderMagicNumber()==Magic && OrderType()== OP_BUY)
+          count++;
+	   }
+   }
+   return(count);
+}
+
+//+------------------------------------------------------------------+
+//Проверка количества открытых ордеров на продажу
+//+------------------------------------------------------------------+
+int CountSell() //На продажу
+{
+int count=0;
+for (int i=OrdersTotal()-1; i>=0; i--)
+   {
+	if(OrderSelect(i,SELECT_BY_POS, MODE_TRADES))
+	   {
+		if (OrderSymbol()==Symbol()&& OrderMagicNumber()==Magic && OrderType()== OP_SELL)
+          count++;
+	   }
+   }
+   return(count);
+}
