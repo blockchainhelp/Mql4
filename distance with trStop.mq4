@@ -55,3 +55,17 @@ void OnDeinit(const int reason)
 //---
    
   }
+//+------------------------------------------------------------------+
+//| Expert tick function                                             |
+//+------------------------------------------------------------------+
+void OnTick()
+  {
+// Активация трейлинг стоп 
+   Trailing();
+   CountBuy();
+   CountSell();
+   CountBuyStop();
+   CountSellStop();
+   Checker();
+  }
+  
