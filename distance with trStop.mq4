@@ -199,3 +199,37 @@ void Open_SELLSTOP()
          int ticket = OrderSend(Symbol(),OP_SELLSTOP,Lot,Price,5,SL,TP," ",Magic,0,clrBlue);
      }
 }
+
+//+------------------------------------------------------------------+
+// Удаление отложенных ордеров
+//+------------------------------------------------------------------+
+void DeleteBuyStop() //На покупку
+{
+if(DelBuyStop)
+   {
+    for (int i=OrdersTotal()-1; i>=0; i--)
+    {
+	   if(OrderSelect(i,SELECT_BY_POS, MODE_TRADES))
+	   {
+		if (OrderSymbol()==Symbol()&& OrderMagicNumber()==Magic && OrderType()== OP_BUYSTOP)
+        int  ticket=OrderDelete(OrderTicket(),clrRed);
+	   }
+     }
+    }
+}
+
+//+------------------------------------------------------------------+
+void DeleteSellStop() //На продажу
+{
+if (DelSellStop)
+   {
+      for (int i=OrdersTotal()-1; i>=0; i--)
+         {
+	      if(OrderSelect(i,SELECT_BY_POS, MODE_TRADES))
+	         {
+		      if (OrderSymbol()==Symbol()&& OrderMagicNumber()==Magic && OrderType()== OP_SELLSTOP)
+           int ticket=OrderDelete(OrderTicket(),clrRed);
+	         }
+         }
+   }
+ }
