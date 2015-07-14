@@ -10,11 +10,15 @@
 //--- input parameters
 input int      Magic             = 1; // expert id
 input double   Lot               = 0.01; // lot parametr
+extern int     StopLoss          = 30;
+extern int     TakeProfit        = 40;
 input string   TimeToSetOrders_1 = "10:20";
 input string   TimeToSetOrders_2 = "15:15";
 input string   TimeToSetOrders_3 = "02:00";
 extern int      Distance          = 20;
 extern bool    TrailingSwitcher  = true;
+extern int     TrailingStop      = 5;
+extern int     TrailingStep      = 5;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -23,7 +27,10 @@ int OnInit()
 //--- increment for terminals with 3 or 5 digits
    if(Digits == 3 || Digits == 5)
      {
-      Distance *= 10;
+      Distance       *= 10;
+      TrailingStop   *= 10;
+      StopLoss       *= 10;
+      TakeProfit     *= 10;
      }
 //---
    return(INIT_SUCCEEDED);
@@ -88,7 +95,8 @@ int TimeChecker()
    string Curtime = TimeToString(TimeCurrent(), TIME_MINUTES);
       if(Curtime == TimeToSetOrders_1) return(1);
       if(Curtime == TimeToSetOrders_2) return(2);
-      if(Curtime == TimeToSetOrders_3) return(3);  
+      if(Curtime == TimeToSetOrders_3) return(3); 
+   return(0);
 }
 
 //+------------------------------------------------------------------+
@@ -97,7 +105,7 @@ int TimeChecker()
 void Enter_market()
 {
   int Time_check      = TimeChecker();
-  int STOP_OrderCheck = CountByStop() + CountSellStop;
+  int STOP_OrderCheck = CountByStop() + CountSellStop();
   
 
 }
@@ -120,9 +128,9 @@ int Trailing()
                   {
                      if (OrderStopLoss()<Bid-(TrailingStop+TrailingStep)*Point)
                      {
-                        SL=NormalizeDouble(Bid-TrailingStop*Point,Digits);
-                        if(OrderStopLoss()!=SL)
-                        OrderModify(OrderTicket(),OrderOpenPrice(),SL,0,0);
+                        double SL=NormalizeDouble(Bid-TrailingStop*Point,Digits);
+                        if(OrderStopLoss()!=StopLoss)
+                        int result = OrderModify(OrderTicket(),OrderOpenPrice(),SL,0,0);
                      }
                   }  
                }
@@ -133,9 +141,9 @@ int Trailing()
                {
                   if (OrderStopLoss()>Ask+(TrailingStop+TrailingStep)*Point)
                   {
-                     SL=NormalizeDouble(Ask+TrailingStop*Point,Digits);
-                     if(OrderStopLoss()!=SL)
-                     OrderModify(OrderTicket(),OrderOpenPrice(),SL,0,0);
+                    double SL=NormalizeDouble(Ask+TrailingStop*Point,Digits);
+                     if(OrderStopLoss()!=StopLoss)
+                   int result = OrderModify(OrderTicket(),OrderOpenPrice(),SL,0,0);
                   }
                }
             }
