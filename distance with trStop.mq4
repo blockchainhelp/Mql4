@@ -13,6 +13,7 @@ input string   TimeToSetOrders_1= 10:20;
 input string   TimeToSetOrders_2= 15:15;
 input string   TimeToSetOrders_3= 02:00;
 input int      Distance         = 20;
+extern bool    TrailingSwitcher = true;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -39,6 +40,8 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
   {
+// Активация трейлинг стоп 
+   Trailing();
 //Проверка количества отложенных ордеров на покупку 
    CountByStop();
 //Проверка количества отложенных ордеров на продажу
@@ -81,39 +84,42 @@ for (int i=OrdersTotal()-1; i>=0; i--)
 //+------------------------------------------------------------------+
 int Trailing()
 {
-   for( int i=0; i<OrdersTotal(); i++)
-   {
-      if(OrderSelect(i,SELECT_BY_POS,MODE_TRADES))
+   if(TrailingSwitcher)
+     {
+      for( int i=0; i<OrdersTotal(); i++)
       {
-         if(OrderMagicNumber()==Magic)
+         if(OrderSelect(i,SELECT_BY_POS,MODE_TRADES))
          {
-           if (OrderType()==OP_BUY)
+            if(OrderMagicNumber()==Magic)
             {
-               if (Bid-OrderOpenPrice()> TrailingStop*Point)
+              if (OrderType()==OP_BUY)
                {
-                  if (OrderStopLoss()<Bid-(TrailingStop+TrailingStep)*Point)
+                  if (Bid-OrderOpenPrice()> TrailingStop*Point)
                   {
-                     SL=NormalizeDouble(Bid-TrailingStop*Point,Digits);
+                     if (OrderStopLoss()<Bid-(TrailingStop+TrailingStep)*Point)
+                     {
+                        SL=NormalizeDouble(Bid-TrailingStop*Point,Digits);
+                        if(OrderStopLoss()!=SL)
+                        OrderModify(OrderTicket(),OrderOpenPrice(),SL,0,0);
+                     }
+                  }  
+               }
+            
+            if(OrderType()==OP_SELL)
+            {
+               if(OrderOpenPrice()-Ask>TrailingStop*Point)
+               {
+                  if (OrderStopLoss()>Ask+(TrailingStop+TrailingStep)*Point)
+                  {
+                     SL=NormalizeDouble(Ask+TrailingStop*Point,Digits);
                      if(OrderStopLoss()!=SL)
                      OrderModify(OrderTicket(),OrderOpenPrice(),SL,0,0);
                   }
-               }  
-            }
-         
-         if(OrderType()==OP_SELL)
-         {
-            if(OrderOpenPrice()-Ask>TrailingStop*Point)
-            {
-               if (OrderStopLoss()>Ask+(TrailingStop+TrailingStep)*Point)
-               {
-                  SL=NormalizeDouble(Ask+TrailingStop*Point,Digits);
-                  if(OrderStopLoss()!=SL)
-                  OrderModify(OrderTicket(),OrderOpenPrice(),SL,0,0);
                }
             }
-         }
+            }
          }
       }
-   }
+     }
    return(0);
 }
