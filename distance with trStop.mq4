@@ -233,3 +233,49 @@ if (DelSellStop)
          }
    }
  }
+
+//+------------------------------------------------------------------+
+//Трейлинг стоп
+//+------------------------------------------------------------------+
+int Trailing()
+{
+   if(TrailingSwitcher)
+     {
+      for( int i=0; i<OrdersTotal(); i++)
+      {
+         if(OrderSelect(i,SELECT_BY_POS,MODE_TRADES))
+         {
+            if(OrderMagicNumber()==Magic)
+            {
+              if (OrderType()==OP_BUY)
+               {
+                  if (Bid-OrderOpenPrice()> TrailingStop*Point)
+                  {
+                     if (OrderStopLoss()<Bid-(TrailingStop+TrailingStep)*Point)
+                     {
+                        double SL=NormalizeDouble(Bid-TrailingStop*Point,Digits);
+                        if(OrderStopLoss()!=StopLoss)
+                        int result = OrderModify(OrderTicket(),OrderOpenPrice(),SL,0,0);
+                     }
+                  }  
+               }
+            
+            if(OrderType()==OP_SELL)
+            {
+               if(OrderOpenPrice()-Ask>TrailingStop*Point)
+               {
+                  if (OrderStopLoss()>Ask+(TrailingStop+TrailingStep)*Point)
+                  {
+                    double SL=NormalizeDouble(Ask+TrailingStop*Point,Digits);
+                     if(OrderStopLoss()!=StopLoss)
+                   int result = OrderModify(OrderTicket(),OrderOpenPrice(),SL,0,0);
+                  }
+               }
+            }
+            }
+         }
+      }
+     }
+   return(0);
+}
+//+------------------------------------------------------------------+
