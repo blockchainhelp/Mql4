@@ -101,3 +101,37 @@ for (int i=OrdersTotal()-1; i>=0; i--)
    }
    return(count);
 }
+
+//+------------------------------------------------------------------+
+//Проверка количества отложенных ордеров на покупку 
+//+------------------------------------------------------------------+
+int CountBuyStop() //На покупку
+{
+int count=0;
+for (int i=OrdersTotal()-1; i>=0; i--)
+   {
+	if(OrderSelect(i,SELECT_BY_POS, MODE_TRADES))
+	   {
+		if (OrderSymbol()==Symbol()&& OrderMagicNumber()==Magic && OrderType()== OP_BUYSTOP)
+          count++;
+	   }
+   }
+   return(count);
+}
+
+//+------------------------------------------------------------------+
+//Проверка количества отложенных ордеров на продажу 
+//+------------------------------------------------------------------+
+int CountSellStop() //На продажу
+{
+int count=0;
+for (int i=OrdersTotal()-1; i>=0; i--)
+   {
+	if(OrderSelect(i,SELECT_BY_POS, MODE_TRADES))
+	   {
+		if (OrderSymbol()==Symbol()&& OrderMagicNumber()==Magic && OrderType()== OP_SELLSTOP)
+          count++;
+	   }
+   }
+   return(count);
+ }
