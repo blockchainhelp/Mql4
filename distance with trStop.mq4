@@ -50,11 +50,43 @@ void OnTick()
   {
 // Активация трейлинг стоп 
    Trailing();
-//Проверка количества отложенных ордеров на покупку 
-   CountByStop();
-//Проверка количества отложенных ордеров на продажу
-   CountSellStop();
+// Вход в рынок
+   Enter_market();
   }
+  
+//+------------------------------------------------------------------+
+//Проверка количества открытых ордеров на покупку
+//+------------------------------------------------------------------+
+int CountBuy() //На покупку
+{
+int count=0;
+for (int i=OrdersTotal()-1; i>=0; i--)
+   {
+	if(OrderSelect(i,SELECT_BY_POS, MODE_TRADES))
+	   {
+		if (OrderSymbol()==Symbol()&& OrderMagicNumber()==Magic && OrderType()== OP_BUY)
+          count++;
+	   }
+   }
+   return(count);
+}
+//+------------------------------------------------------------------+
+//Проверка количества открытых ордеров на продажу
+//+------------------------------------------------------------------+
+int CountSell() //На продажу
+{
+int count=0;
+for (int i=OrdersTotal()-1; i>=0; i--)
+   {
+	if(OrderSelect(i,SELECT_BY_POS, MODE_TRADES))
+	   {
+		if (OrderSymbol()==Symbol()&& OrderMagicNumber()==Magic && OrderType()== OP_SELL)
+          count++;
+	   }
+   }
+   return(count);
+}
+
 //+------------------------------------------------------------------+
 //Проверка количества отложенных ордеров на покупку 
 //+------------------------------------------------------------------+
@@ -88,7 +120,7 @@ for (int i=OrdersTotal()-1; i>=0; i--)
    return(count);
  }
 //+------------------------------------------------------------------+
-
+//Проверка условия времени
 //+------------------------------------------------------------------+
 int TimeChecker()
 {
@@ -106,6 +138,8 @@ void Enter_market()
 {
   int Time_check      = TimeChecker();
   int STOP_OrderCheck = CountByStop() + CountSellStop();
+  int Open_OrderCheck = CountBuy() + CountSell();
+  
   
 
 }
