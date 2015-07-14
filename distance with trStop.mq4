@@ -8,21 +8,22 @@
 #property version   "1.00"
 #property strict
 //--- input parameters
-input double   Lot = 0.01; // lot parametr
-input string   TimeToSetOrders_1= 10:20;
-input string   TimeToSetOrders_2= 15:15;
-input string   TimeToSetOrders_3= 02:00;
-input int      Distance         = 20;
-extern bool    TrailingSwitcher = true;
+input int      Magic             = 1; // expert id
+input double   Lot               = 0.01; // lot parametr
+input string   TimeToSetOrders_1 = "10:20";
+input string   TimeToSetOrders_2 = "15:15";
+input string   TimeToSetOrders_3 = "02:00";
+extern int      Distance          = 20;
+extern bool    TrailingSwitcher  = true;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit()
   {
 //--- increment for terminals with 3 or 5 digits
-   if(Digits = 3 || Digits=5)
+   if(Digits == 3 || Digits == 5)
      {
-      Distance = *10;
+      Distance *= 10;
      }
 //---
    return(INIT_SUCCEEDED);
@@ -79,6 +80,27 @@ for (int i=OrdersTotal()-1; i>=0; i--)
    }
    return(count);
  }
+//+------------------------------------------------------------------+
+
+//+------------------------------------------------------------------+
+int TimeChecker()
+{
+   string Curtime = TimeToString(TimeCurrent(), TIME_MINUTES);
+      if(Curtime == TimeToSetOrders_1) return(1);
+      if(Curtime == TimeToSetOrders_2) return(2);
+      if(Curtime == TimeToSetOrders_3) return(3);  
+}
+
+//+------------------------------------------------------------------+
+//Функция входа в рынок
+//+------------------------------------------------------------------+
+void Enter_market()
+{
+  int Time_check      = TimeChecker();
+  int STOP_OrderCheck = CountByStop() + CountSellStop;
+  
+
+}
 //+------------------------------------------------------------------+
 //Трейлинг стоп
 //+------------------------------------------------------------------+
