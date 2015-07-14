@@ -172,3 +172,30 @@ void Checker ()
              
         
 }
+
+//+------------------------------------------------------------------+
+//Открытие ордера на покупку
+//+------------------------------------------------------------------+
+void Open_BYSTOP()
+{
+   if(TradeB)
+     {
+         double Price = (Ask+Distance*Point);
+         double TP = (Ask+(Distance+TakeProfit)*Point);
+         double SL = (Bid-StopLoss*Point);
+         int ticket = OrderSend(Symbol(),OP_BUYSTOP,Lot,Price,5,SL,TP," ",Magic,0,clrGreen);
+     }
+}
+//+------------------------------------------------------------------+
+//Открытие ордера на продажу
+//+------------------------------------------------------------------+
+void Open_SELLSTOP() 
+{
+   if(TradeS)
+     {
+         double Price = (Bid-Distance*Point);
+         double TP = (Bid-(Distance+TakeProfit)*Point);
+         double SL = (Ask+StopLoss*Point);
+         int ticket = OrderSend(Symbol(),OP_SELLSTOP,Lot,Price,5,SL,TP," ",Magic,0,clrBlue);
+     }
+}
