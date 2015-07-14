@@ -34,3 +34,24 @@ bool           DelBuyStop        =false;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
+int OnInit()
+  {
+//--- increment for terminals with 3 or 5 digits
+   if(Digits == 3 || Digits == 5)
+     {
+      Distance       *= 10;
+      TrailingStop   *= 10;
+      StopLoss       *= 10;
+      TakeProfit     *= 10;
+     }
+//---
+   return(INIT_SUCCEEDED);
+  }
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+  {
+//---
+   
+  }
