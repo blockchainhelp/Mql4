@@ -135,3 +135,40 @@ for (int i=OrdersTotal()-1; i>=0; i--)
    }
    return(count);
  }
+
+//+------------------------------------------------------------------+
+//Функция входа в рынок
+//+------------------------------------------------------------------+
+void Checker () 
+{  
+   
+       string Timer = TimeToString(TimeCurrent(),TIME_MINUTES);
+       
+       if((Timer == TimeToSetOrders_1 || Timer == TimeToSetOrders_2 || Timer == TimeToSetOrders_3) && (CountBuyStop() + CountSellStop()) ==0  )
+         {
+             TradeB = true;
+             Open_BYSTOP();
+   
+             TradeS = true;
+             Open_SELLSTOP();
+         }
+        else
+          {
+            TradeB = false;
+            TradeS = false;
+          }
+      if(TimeToStr(TimeCurrent(), TIME_MINUTES)==TimeToDelOrders_1||TimeToStr(TimeCurrent(), TIME_MINUTES)==TimeToDelOrders_2||TimeToStr(TimeCurrent(), TIME_MINUTES)==TimeToDelOrders_3)
+        {
+            DelBuyStop  = true;
+            DeleteBuyStop();
+            DelSellStop = true;
+            DeleteSellStop();
+        }
+      else
+        {
+            DelBuyStop  = false;
+            DelSellStop = false;
+        }
+             
+        
+}
