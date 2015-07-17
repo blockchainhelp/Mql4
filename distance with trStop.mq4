@@ -9,9 +9,6 @@
 #property strict
 //--- input parameters
 input int      Magic             = 1; // expert id
-input double   Lot               = 1; // lot 
-extern int     StopLoss          = 30; 
-extern int     TakeProfit        = 40;
 input string   TimeToSetOrders_1 = "02:00";
 input string   TimeToDelOrders_1 = "08:00";
 
@@ -21,11 +18,19 @@ input string   TimeToDelOrders_2 = "14:00";
 input string   TimeToSetOrders_3 = "15:15";
 input string   TimeToDelOrders_3 = "17:00";
 
+input double   Lot               = 1; // lot 
+extern int     StopLoss          = 30; 
+extern int     TakeProfit        = 40;
 extern int     Distance          = 20;
-extern bool    TrailingSwitcher  = true;
-extern int     TrailingStop      = 10;
+
+extern bool    TrailingSwitcher  = true; // Trailing Stop
+extern int     TrailingStop      = 10; // Trailing Stop Distance
 extern int     TrailingStep      = 50;
 
+extern bool    IRSI              =false; // RSI Switcher
+extern int     RSIPeriod         =8; //Period Days
+extern int     RSIStopBuy        =65;// RSI Level for Stop buy
+extern int     RSIStopSell       =35;// RSI Level for Stop sell
 bool           Time_check        =false;
 bool           TradeB            =false;
 bool           TradeS            =false;
@@ -145,11 +150,32 @@ void Checker ()
        string Timer = TimeToString(TimeCurrent(),TIME_MINUTES);
        
        if((Timer == TimeToSetOrders_1 || Timer == TimeToSetOrders_2 || Timer == TimeToSetOrders_3) && (CountBuyStop() + CountSellStop()) ==0  )
-         {
+         {  // Работа с ордером на покупку
+            
              TradeB = true;
+             if(IRSI)
+               {
+                  if(iRSI (Symbol(),0,RSIPeriod,6,1)>RSIStopBuy)
+                    {
+                     TradeB =false;
+                    }
+                
+               }
+             
+             
              Open_BYSTOP();
-   
+             
+            // Работа с ордером на продажу
+            
              TradeS = true;
+             if(IRSI)
+               {
+                  if(iRSI (Symbol(),0,RSIPeriod,6,1)>RSIStopSell)
+                     {
+                      TradeS =false;
+                     }
+               }
+             
              Open_SELLSTOP();
          }
         else
@@ -180,6 +206,7 @@ void Open_BYSTOP()
 {
    if(TradeB)
      {
+         RefreshRates();
          double Price = (Ask+Distance*Point);
          double TP = (Ask+(Distance+TakeProfit)*Point);
          double SL = (Bid-StopLoss*Point);
@@ -193,6 +220,7 @@ void Open_SELLSTOP()
 {
    if(TradeS)
      {
+         RefreshRates();
          double Price = (Bid-Distance*Point);
          double TP = (Bid-(Distance+TakeProfit)*Point);
          double SL = (Ask+StopLoss*Point);
