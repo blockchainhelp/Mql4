@@ -36,6 +36,7 @@ bool           TradeB            =false;
 bool           TradeS            =false;
 bool           DelSellStop       =false;
 bool           DelBuyStop        =false;
+
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
