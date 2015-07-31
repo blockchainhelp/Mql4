@@ -16,13 +16,16 @@ input string   TimeSetOrders3   ="15:00";
 input string   TimeCloseOrders3 ="17:00";
 extern int       Tp             =10;
 extern int       Sl             =30;
-extern int       Dist           =8;
+extern int       Dist           =5;
 input double    Lot             =1;
-extern int      TrailingStop    =1;
-extern int      TrailingStep    =2;
+extern bool     TrailingON      =false;
+extern bool     OSMA            =true;
+extern int      TrailingStop    =10;
+extern int      TrailingStep    =1;
 double OpriceB,StopLB,TakePB,OpriceS,StopLS,TakePS,SL,SP;
 int ticketBS,ticketSS;
 bool ticket;
+bool BuyON, SellON;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -56,7 +59,11 @@ void OnTick()
    CountS();
    CountBS();
    CountSS();
+   DeleteBS();
+   DeleteSS();
    Enter();
+   Osma_indicator();
+   Comment(" SellON = " + SellON,"  BuyON = " + BuyON,"  Osma_data = " + Osma_indicator());
   }
 //+------------------------------------------------------------------+
 //Проверка количества открытых ордеров условие 
@@ -68,7 +75,7 @@ for (int i=OrdersTotal()-1; i>=0; i--)
    {
 	if(OrderSelect(i,SELECT_BY_POS, MODE_TRADES))
 	   {
-		if (OrderSymbol()==Symbol()&& OrderMagicNumber()==Magic && OrderType()== OP_BUYSTOP)
+		if (OrderSymbol()==Symbol()&& OrderMagicNumber()==Magic && OrderType()== OP_BUY)
           count++;
 	   }
    }
@@ -82,6 +89,37 @@ for (int i=OrdersTotal()-1; i>=0; i--)
    {
 	if(OrderSelect(i,SELECT_BY_POS, MODE_TRADES))
 	   {
+		if (OrderSymbol()==Symbol()&& OrderMagicNumber()==Magic && OrderType()== OP_SELL)
+          count++;
+	   }
+   }
+   return(count);
+ }
+
+//+------------------------------------------------------------------+
+//Проверка количества открытых ордеров условие 
+//+------------------------------------------------------------------+
+int CountBS() //На покупку
+{
+int count=0;
+for (int i=OrdersTotal()-1; i>=0; i--)
+   {
+	if(OrderSelect(i,SELECT_BY_POS, MODE_TRADES))
+	   {
+		if (OrderSymbol()==Symbol()&& OrderMagicNumber()==Magic && OrderType()== OP_BUYSTOP)
+          count++;
+	   }
+   }
+   return(count);
+}
+//+------------------------------------------------------------------+
+int CountSS() //На продажу
+{
+int count=0;
+for (int i=OrdersTotal()-1; i>=0; i--)
+   {
+	if(OrderSelect(i,SELECT_BY_POS, MODE_TRADES))
+	   {
 		if (OrderSymbol()==Symbol()&& OrderMagicNumber()==Magic && OrderType()== OP_SELLSTOP)
           count++;
 	   }
@@ -89,24 +127,60 @@ for (int i=OrdersTotal()-1; i>=0; i--)
    return(count);
  }
 //+------------------------------------------------------------------+
+
+
+
+double Osma_indicator()
+{
+   if(OSMA)
+   {
+   double Osma_data_row =iOsMA(Symbol(),15,2,8,6,6,1);
+   double Osma_data_mult = NormalizeDouble(Osma_data_row*1000,3*Digits);
+   if(Osma_data_mult<0)
+     {
+      SellON =false;
+     }
+   else
+     {
+      SellON =true;
+     }
+     
+   if(Osma_data_mult>0)
+     {
+      BuyON =false;
+     }
+   else
+     {
+      BuyON =true;
+     }
+     return(Osma_data_mult);
+   }
+   return(0);
+}
+//+------------------------------------------------------------------+
 void Enter()
 {
    if (TimeToStr(TimeCurrent(), TIME_MINUTES)==TimeSetOrders ||TimeToStr(TimeCurrent(), TIME_MINUTES)==TimeSetOrders2||TimeToStr(TimeCurrent(), TIME_MINUTES)==TimeSetOrders3)
    { 
-   if (CountB()+CountS()==0)
+   if (CountB()+ CountS() == 0 && CountBS() + CountSS() == 0)
       {
    SP=(Ask-Bid);
    OpriceB =(Bid+Dist*Point); // изменить form ask to bid
    StopLB =(OpriceB-Sl*Point);
    TakePB =(OpriceB+Tp*Point);
 //Открываем Отложенный ордер на покупку
-ticketBS=OrderSend(Symbol(),OP_BUYSTOP,Lot,OpriceB,0,StopLB,TakePB,"timer",Magic,0,clrGreen);    
-    
+if(BuyON)
+{
+      ticketBS=OrderSend(Symbol(),OP_BUYSTOP,Lot,OpriceB,0,StopLB,TakePB,"timer",Magic,0,clrGreen);    
+}   
 //Открываем Отложенный ордер на продажу
    OpriceS =(Bid-Dist*Point);
    StopLS =(OpriceS+Sl*Point);
    TakePS =(OpriceS-Tp*Point); 
-ticketSS=OrderSend(Symbol(),OP_SELLSTOP,Lot,OpriceS,0,StopLS,TakePS,"timer",Magic,0,clrBlack);
+if (SellON)
+{
+   ticketSS=OrderSend(Symbol(),OP_SELLSTOP,Lot,OpriceS,0,StopLS,TakePS,"timer",Magic,0,clrBlack);
+}  
       }
    }
 }
@@ -114,6 +188,8 @@ ticketSS=OrderSend(Symbol(),OP_SELLSTOP,Lot,OpriceS,0,StopLS,TakePS,"timer",Magi
 //+------------------------------------------------------------------+
 int Trailing()
 {
+   if (TrailingON)
+  {
    for( int i=0; i<OrdersTotal(); i++)
    {
       if(OrderSelect(i,SELECT_BY_POS,MODE_TRADES))
@@ -148,12 +224,13 @@ int Trailing()
          }
       }
    }
+  }
    return(0);
 }
 //+------------------------------------------------------------------+/
 //Проверка наличия  отложенных ордеров
 //+------------------------------------------------------------------+/
-void CountBS() //На покупку
+void DeleteBS() //На покупку
 {
 if (TimeToStr(TimeCurrent(), TIME_MINUTES)==TimeCloseOrders||TimeToStr(TimeCurrent(), TIME_MINUTES)==TimeCloseOrders2||TimeToStr(TimeCurrent(), TIME_MINUTES)==TimeCloseOrders3)
    {
@@ -168,7 +245,7 @@ if (TimeToStr(TimeCurrent(), TIME_MINUTES)==TimeCloseOrders||TimeToStr(TimeCurre
     }
 }
 //+------------------------------------------------------------------+
-void CountSS() //На продажу
+void DeleteSS() //На продажу
 {
 if (TimeToStr(TimeCurrent(), TIME_MINUTES)==TimeCloseOrders||TimeToStr(TimeCurrent(), TIME_MINUTES)==TimeCloseOrders2||TimeToStr(TimeCurrent(), TIME_MINUTES)==TimeCloseOrders3)
    {
