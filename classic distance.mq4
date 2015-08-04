@@ -134,7 +134,7 @@ double Osma_indicator()
 {
    if(OSMA)
    {
-   double Osma_data_row =iOsMA(Symbol(),15,2,8,6,6,1);
+   double Osma_data_row =iOsMA(Symbol(),0,2,8,6,6,1);
    double Osma_data_mult = NormalizeDouble(Osma_data_row*1000,3*Digits);
    if(Osma_data_mult<0)
      {
